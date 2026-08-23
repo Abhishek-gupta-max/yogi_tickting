@@ -1,0 +1,19 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(dashboard)/approvals/page": "app/(dashboard)/approvals/page.js",
+  "/(dashboard)/audit-logs/page": "app/(dashboard)/audit-logs/page.js",
+  "/(dashboard)/dashboard/page": "app/(dashboard)/dashboard/page.js",
+  "/(dashboard)/departments/page": "app/(dashboard)/departments/page.js",
+  "/(dashboard)/knowledge-base/page": "app/(dashboard)/knowledge-base/page.js",
+  "/(dashboard)/notifications/page": "app/(dashboard)/notifications/page.js",
+  "/(dashboard)/reports/page": "app/(dashboard)/reports/page.js",
+  "/(dashboard)/settings/page": "app/(dashboard)/settings/page.js",
+  "/(dashboard)/sla/page": "app/(dashboard)/sla/page.js",
+  "/(dashboard)/teams/page": "app/(dashboard)/teams/page.js",
+  "/(dashboard)/tickets/[id]/page": "app/(dashboard)/tickets/[id]/page.js",
+  "/(dashboard)/tickets/new/page": "app/(dashboard)/tickets/new/page.js",
+  "/(dashboard)/tickets/page": "app/(dashboard)/tickets/page.js",
+  "/(dashboard)/users/page": "app/(dashboard)/users/page.js",
+  "/page": "app/page.js"
+}

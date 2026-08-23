@@ -1,0 +1,493 @@
+// ============================================================================
+// PRISMA SCHEMA — MULTI-TENANT ENTERPRISE ITSM PLATFORM
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ───────────────────────────────────────────────────────────────────
+
+enum RoleType {
+  SUPER_ADMIN
+  ORGANIZATION_ADMIN
+  TEAM_LEAD
+  AGENT
+  REQUESTER
+  VIEWER
+}
+
+enum TicketStatusType {
+  NEW
+  OPEN
+  IN_PROGRESS
+  PENDING
+  ON_HOLD
+  RESOLVED
+  CLOSED
+  CANCELLED
+}
+
+enum TicketPriorityType {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum SLAState {
+  HEALTHY
+  WARNING
+  BREACHED
+  PAUSED
+  COMPLETED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// ─── TENANT ORGANIZATIONS ───────────────────────────────────────────────────
+
+model Organization {
+  id               String   @id @default(uuid())
+  name             String
+  code             String   @unique
+  logo             String?
+  email            String?
+  phone            String?
+  address          String?
+  timezone         String   @default("UTC")
+  status           String   @default("active")
+  subscriptionPlan String   @default("enterprise")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  users             User[]
+  departments       Department[]
+  teams             Team[]
+  branches          Branch[]
+  customers         Customer[]
+  tickets           Ticket[]
+  categories        Category[]
+  priorities        Priority[]
+  statuses          Status[]
+  slaPolicies       SLAPolicy[]
+  knowledgeArticles KnowledgeArticle[]
+  auditLogs         AuditLog[]
+  automationRules   AutomationRule[]
+  notifications     Notification[]
+  settings          AppSetting[]
+
+  @@map("organizations")
+}
+
+// ─── USERS & RBAC ───────────────────────────────────────────────────────────
+
+model User {
+  id              String    @id @default(uuid())
+  organizationId  String    @map("organization_id")
+  name            String
+  email           String    @unique
+  passwordHash    String    @map("password_hash")
+  phone           String?
+  avatarUrl       String?   @map("avatar_url")
+  role            RoleType  @default(AGENT)
+  departmentId    String?   @map("department_id")
+  teamId          String?   @map("team_id")
+  status          String    @default("active")
+  isEmailVerified Boolean   @default(false) @map("is_email_verified")
+  lastLoginAt     DateTime? @map("last_login_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  department   Department?  @relation(fields: [departmentId], references: [id])
+  team         Team?        @relation(fields: [teamId], references: [id])
+
+  requestedTickets   Ticket[]           @relation("TicketRequester")
+  assignedTickets    Ticket[]           @relation("TicketAssignee")
+  comments           TicketComment[]
+  auditLogs          AuditLog[]
+  teamMemberships    TeamMember[]
+  approvalRequests   ApprovalRequest[]  @relation("ApprovalApprover")
+  requestedApprovals ApprovalRequest[]  @relation("ApprovalRequester")
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("users")
+}
+
+// ─── DEPARTMENTS & TEAMS ─────────────────────────────────────────────────────
+
+model Department {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  name           String
+  code           String?
+  description    String?
+  managerId      String?  @map("manager_id")
+  status         String   @default("active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  users        User[]
+  teams        Team[]
+  tickets      Ticket[]
+
+  @@index([organizationId])
+  @@map("departments")
+}
+
+model Team {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  departmentId   String?  @map("department_id")
+  name           String
+  code           String?
+  description    String?
+  leadId         String?  @map("lead_id")
+  status         String   @default("active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  department   Department?  @relation(fields: [departmentId], references: [id])
+  users        User[]
+  members      TeamMember[]
+  tickets      Ticket[]
+
+  @@index([organizationId])
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  teamId    String   @map("team_id")
+  userId    String   @map("user_id")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+model Branch {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  name           String
+  code           String?
+  city           String?
+  country        String?
+  status         String   @default("active")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("branches")
+}
+
+model Customer {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  name           String
+  email          String
+  phone          String?
+  status         String   @default("active")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("customers")
+}
+
+// ─── TICKETING ENGINE ───────────────────────────────────────────────────────
+
+model Category {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  name           String
+  description    String?
+  parentId       String?  @map("parent_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tickets      Ticket[]
+
+  @@index([organizationId])
+  @@map("categories")
+}
+
+model Priority {
+  id                  String             @id @default(uuid())
+  organizationId      String             @map("organization_id")
+  name                String
+  level               TicketPriorityType @default(MEDIUM)
+  responseTimeMinutes  Int                @default(60) @map("response_time_minutes")
+  resolutionTimeMinutes Int               @default(1440) @map("resolution_time_minutes")
+  createdAt           DateTime           @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("priorities")
+}
+
+model Status {
+  id             String           @id @default(uuid())
+  organizationId String           @map("organization_id")
+  name           String
+  type           TicketStatusType @default(OPEN)
+  color          String           @default("#4F46E5")
+  isDefault      Boolean          @default(false) @map("is_default")
+  createdAt      DateTime         @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("statuses")
+}
+
+model Ticket {
+  id              String             @id @default(uuid())
+  ticketNumber    String             @map("ticket_number")
+  organizationId  String             @map("organization_id")
+  title           String
+  description     String             @db.Text
+  categoryId      String?            @map("category_id")
+  priority        TicketPriorityType @default(MEDIUM)
+  status          TicketStatusType   @default(NEW)
+  customerName    String?            @map("customer_name")
+  customerEmail   String?            @map("customer_email")
+  requesterId     String             @map("requester_id")
+  assigneeId      String?            @map("assignee_id")
+  teamId          String?            @map("team_id")
+  departmentId    String?            @map("department_id")
+  slaPolicyId     String?            @map("sla_policy_id")
+  slaState        SLAState           @default(HEALTHY) @map("sla_state")
+  responseDueAt   DateTime?          @map("response_due_at")
+  resolutionDueAt DateTime?          @map("resolution_due_at")
+  resolvedAt      DateTime?          @map("resolved_at")
+  closedAt        DateTime?          @map("closed_at")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  organization     Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  category         Category?          @relation(fields: [categoryId], references: [id])
+  requester        User               @relation("TicketRequester", fields: [requesterId], references: [id])
+  assignee         User?              @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  department       Department?        @relation(fields: [departmentId], references: [id])
+  team             Team?              @relation(fields: [teamId], references: [id])
+  slaPolicy        SLAPolicy?         @relation(fields: [slaPolicyId], references: [id])
+  comments         TicketComment[]
+  attachments      TicketAttachment[]
+  history          TicketHistory[]
+  approvalRequests ApprovalRequest[]
+
+  @@unique([organizationId, ticketNumber])
+  @@index([organizationId])
+  @@index([status])
+  @@index([priority])
+  @@index([assigneeId])
+  @@index([teamId])
+  @@index([createdAt])
+  @@map("tickets")
+}
+
+model TicketComment {
+  id         String   @id @default(uuid())
+  ticketId   String   @map("ticket_id")
+  userId     String   @map("user_id")
+  userName   String   @map("user_name")
+  content    String   @db.Text
+  isInternal Boolean  @default(false) @map("is_internal")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([ticketId])
+  @@map("ticket_comments")
+}
+
+model TicketAttachment {
+  id        String   @id @default(uuid())
+  ticketId  String   @map("ticket_id")
+  fileName  String   @map("file_name")
+  fileUrl   String   @map("file_url")
+  fileSize  Int      @map("file_size")
+  mimeType  String   @map("mime_type")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@map("ticket_attachments")
+}
+
+model TicketHistory {
+  id             String   @id @default(uuid())
+  ticketId       String   @map("ticket_id")
+  organizationId String   @map("organization_id")
+  performedById  String   @map("performed_by_id")
+  action         String
+  fieldChanged   String?  @map("field_changed")
+  oldValue       String?  @map("old_value")
+  newValue       String?  @map("new_value")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([organizationId])
+  @@map("ticket_history")
+}
+
+// ─── SLA & APPROVALS ────────────────────────────────────────────────────────
+
+model SLAPolicy {
+  id                    String             @id @default(uuid())
+  organizationId        String             @map("organization_id")
+  name                  String
+  description           String?
+  priority              TicketPriorityType @default(MEDIUM)
+  responseTimeMinutes   Int                @map("response_time_minutes")
+  resolutionTimeMinutes Int                @map("resolution_time_minutes")
+  isDefault             Boolean            @default(false) @map("is_default")
+  createdAt             DateTime           @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tickets      Ticket[]
+
+  @@index([organizationId])
+  @@map("sla_policies")
+}
+
+model ApprovalRequest {
+  id          String         @id @default(uuid())
+  ticketId    String         @map("ticket_id")
+  requesterId String         @map("requester_id")
+  approverId  String         @map("approver_id")
+  status      ApprovalStatus @default(PENDING)
+  comments    String?
+  requestedAt DateTime       @default(now()) @map("requested_at")
+  actionedAt  DateTime?      @map("actioned_at")
+
+  ticket    Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  requester User   @relation("ApprovalRequester", fields: [requesterId], references: [id])
+  approver  User   @relation("ApprovalApprover", fields: [approverId], references: [id])
+
+  @@index([ticketId])
+  @@map("approval_requests")
+}
+
+// ─── NOTIFICATIONS & AUTOMATION ─────────────────────────────────────────────
+
+model Notification {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  userId         String?  @map("user_id")
+  title          String
+  message        String   @db.Text
+  type           String   @default("info")
+  isRead         Boolean  @default(false) @map("is_read")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([userId])
+  @@map("notifications")
+}
+
+model AutomationRule {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  name           String
+  description    String?
+  triggerEvent   String   @map("trigger_event")
+  conditions     Json
+  actions        Json
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("automation_rules")
+}
+
+// ─── KNOWLEDGE BASE ─────────────────────────────────────────────────────────
+
+model KnowledgeArticle {
+  id             String        @id @default(uuid())
+  organizationId String        @map("organization_id")
+  title          String
+  summary        String?
+  content        String        @db.Text
+  category       String        @default("General")
+  authorName     String        @default("System Admin") @map("author_name")
+  views          Int           @default(0)
+  status         ArticleStatus @default(PUBLISHED)
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("knowledge_articles")
+}
+
+// ─── AUDIT LOGS & SETTINGS ──────────────────────────────────────────────────
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  userId         String?  @map("user_id")
+  action         String
+  entity         String
+  entityId       String?  @map("entity_id")
+  ipAddress      String?  @map("ip_address")
+  metadata       Json?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model AppSetting {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  settingKey     String   @map("setting_key")
+  settingValue   String   @map("setting_value") @db.Text
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, settingKey])
+  @@map("app_settings")
+}
