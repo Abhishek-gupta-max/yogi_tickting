@@ -1,13 +1,12 @@
 import type { FC } from 'react';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { clsx } from 'clsx';
-import { motion } from 'framer-motion';
 import {
   LayoutDashboard, Ticket, Users, Building2, FolderTree, UsersRound,
   ShieldCheck, Timer, Workflow, BarChart3, TrendingUp, BookOpen,
   Settings, ChevronLeft, ChevronRight, LogOut, UserCircle,
-  Layers, GitBranch, Command, ChevronDown, Check, Sparkles, Plus,
+  GitBranch, Command, ChevronDown, Check, FileText,
 } from 'lucide-react';
 import { useSidebarStore } from '@/store/ui.store';
 import { useAuthStore, selectUser } from '@/store/auth.store';
@@ -16,11 +15,18 @@ import type { NavGroup } from '@/types/global.types';
 import type { UserRole } from '@/types/permission.types';
 import toast from 'react-hot-toast';
 
+/* ────────────────────────────────────────────────────────────
+   WORKSPACE DATA
+   ──────────────────────────────────────────────────────────── */
 const WORKSPACES = [
-  { id: 'org-1', name: 'Acme Enterprise', plan: 'Enterprise Plan' },
-  { id: 'org-2', name: 'Globex Cloud Inc', plan: 'Pro SaaS' },
+  { id: 'org-1', name: 'Acme Enterprise', plan: 'Enterprise' },
+  { id: 'org-2', name: 'Globex Cloud Inc', plan: 'Pro' },
 ];
 
+/* ────────────────────────────────────────────────────────────
+   NAV CONFIG — Per role, structured per spec:
+   OVERVIEW · MANAGEMENT · INSIGHTS · CONTENT · SYSTEM
+   ──────────────────────────────────────────────────────────── */
 const NAV_CONFIG: Record<UserRole, NavGroup[]> = {
   super_admin: [
     {
@@ -29,14 +35,20 @@ const NAV_CONFIG: Record<UserRole, NavGroup[]> = {
         { id: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { id: 'organizations', label: 'Organizations', href: '/organizations', icon: Building2 },
         { id: 'users', label: 'All Users', href: '/settings/users', icon: Users },
-        { id: 'system', label: 'System Logs', href: '/system/logs', icon: Layers },
       ],
     },
     {
-      label: 'Reports & Insights',
+      label: 'Insights',
       items: [
         { id: 'reports', label: 'Reports', href: '/reports', icon: BarChart3 },
         { id: 'analytics', label: 'Analytics', href: '/analytics', icon: TrendingUp },
+      ],
+    },
+    {
+      label: 'System',
+      items: [
+        { id: 'system', label: 'Audit Logs', href: '/system/logs', icon: FileText },
+        { id: 'settings', label: 'Settings', href: '/settings/general', icon: Settings },
       ],
     },
   ],
@@ -46,12 +58,12 @@ const NAV_CONFIG: Record<UserRole, NavGroup[]> = {
       items: [
         { id: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { id: 'tickets', label: 'All Tickets', href: '/tickets', icon: Ticket, badge: '142' },
-        { id: 'customers', label: 'Customers', href: '/customers', icon: UserCircle },
       ],
     },
     {
       label: 'Management',
       items: [
+        { id: 'customers', label: 'Customers', href: '/customers', icon: UserCircle },
         { id: 'users', label: 'Users', href: '/settings/users', icon: Users },
         { id: 'departments', label: 'Departments', href: '/settings/departments', icon: FolderTree },
         { id: 'teams', label: 'Teams', href: '/settings/teams', icon: UsersRound },
@@ -74,6 +86,13 @@ const NAV_CONFIG: Record<UserRole, NavGroup[]> = {
         { id: 'kb', label: 'Knowledge Base', href: '/knowledge-base', icon: BookOpen },
       ],
     },
+    {
+      label: 'System',
+      items: [
+        { id: 'settings', label: 'Settings', href: '/settings/general', icon: Settings },
+        { id: 'logs', label: 'Audit Logs', href: '/system/logs', icon: FileText },
+      ],
+    },
   ],
   manager: [
     {
@@ -85,7 +104,7 @@ const NAV_CONFIG: Record<UserRole, NavGroup[]> = {
       ],
     },
     {
-      label: 'Team',
+      label: 'Management',
       items: [
         { id: 'users', label: 'Users', href: '/settings/users', icon: Users },
         { id: 'departments', label: 'Departments', href: '/settings/departments', icon: FolderTree },
@@ -122,6 +141,9 @@ const NAV_CONFIG: Record<UserRole, NavGroup[]> = {
   ],
 };
 
+/* ────────────────────────────────────────────────────────────
+   SIDEBAR COMPONENT
+   ──────────────────────────────────────────────────────────── */
 export const AppLayoutSidebar: FC = () => {
   const { isCollapsed, isMobileOpen, toggleCollapsed, closeMobile } = useSidebarStore();
   const user = useAuthStore(selectUser);
@@ -132,106 +154,109 @@ export const AppLayoutSidebar: FC = () => {
 
   const navGroups = user ? (NAV_CONFIG[user.role] ?? []) : [];
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     useAuthStore.getState().logout();
     navigate('/login');
     toast.success('Signed out successfully');
-  };
+  }, [navigate]);
 
   return (
     <aside
+      aria-label="Main navigation"
       className={clsx(
         'fixed left-0 top-0 h-full flex flex-col z-[1040] transition-all duration-200 ease-out',
-        'bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] shadow-2xl',
-        isCollapsed ? 'w-[72px]' : 'w-[280px]',
+        'bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)]',
+        isCollapsed ? 'w-[72px]' : 'w-[256px]',
         'lg:translate-x-0',
         isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       )}
     >
-      {/* Workspace Switcher Header (72px height) */}
+      {/* ── Workspace Switcher ─────────────────────────────── */}
       <div className={clsx(
-        'flex items-center h-[72px] flex-shrink-0 px-4 border-b border-[var(--sidebar-border)] relative',
-        isCollapsed ? 'justify-center' : 'justify-between'
+        'flex items-center h-[60px] flex-shrink-0 px-3 border-b border-[var(--sidebar-border)]',
+        isCollapsed ? 'justify-center' : 'gap-2'
       )}>
         {!isCollapsed ? (
-          <div className="relative w-full">
+          <div className="relative w-full flex items-center">
             <button
               onClick={() => setShowWorkspaceMenu(!showWorkspaceMenu)}
-              className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-white/5 transition-all border border-transparent hover:border-white/10"
+              className="flex-1 flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-white/5 transition-colors min-w-0"
             >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-600 flex items-center justify-center text-white shadow-md flex-shrink-0 ring-1 ring-white/20">
-                  <Command className="w-5 h-5" />
-                </div>
-                <div className="text-left min-w-0">
-                  <div className="text-xs font-bold text-white truncate flex items-center gap-1">
-                    {activeWorkspace.name}
-                  </div>
-                  <div className="text-[10px] text-[var(--sidebar-text)] truncate">{activeWorkspace.plan}</div>
-                </div>
+              <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)] flex items-center justify-center text-white flex-shrink-0">
+                <Command className="w-4 h-4" />
               </div>
-              <ChevronDown className="w-4 h-4 text-[var(--sidebar-text)]" />
+              <div className="text-left min-w-0 flex-1">
+                <div className="text-[13px] font-semibold text-white truncate">
+                  {activeWorkspace.name}
+                </div>
+                <div className="text-[11px] text-[var(--sidebar-text)] truncate">{activeWorkspace.plan}</div>
+              </div>
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--sidebar-text)] flex-shrink-0" />
+            </button>
+
+            {/* Collapse toggle */}
+            <button
+              onClick={toggleCollapsed}
+              className="hidden lg:flex w-7 h-7 items-center justify-center rounded-md text-[var(--sidebar-text)] hover:text-white hover:bg-white/8 transition-colors flex-shrink-0 ml-1"
+              aria-label="Collapse sidebar"
+            >
+              <ChevronLeft className="w-4 h-4" />
             </button>
 
             {/* Workspace Dropdown */}
             {showWorkspaceMenu && (
-              <div className="absolute left-0 top-full mt-2 w-full surface-card p-1.5 space-y-1 shadow-2xl z-50 animate-scale-in bg-slate-900 border-white/10 text-white">
+              <div className="absolute left-0 top-full mt-1 w-full bg-[#0F172A] border border-[var(--sidebar-border)] rounded-lg p-1 shadow-xl z-50 animate-scale-in">
                 {WORKSPACES.map((ws) => (
                   <button
                     key={ws.id}
                     onClick={() => {
                       setActiveWorkspace(ws);
                       setShowWorkspaceMenu(false);
-                      toast.success(`Switched workspace to ${ws.name}`);
+                      toast.success(`Switched to ${ws.name}`);
                     }}
                     className={clsx(
-                      'w-full flex items-center justify-between p-2.5 rounded-lg text-xs transition-colors',
-                      activeWorkspace.id === ws.id ? 'bg-indigo-600/30 text-indigo-300 font-bold' : 'hover:bg-white/5 text-slate-300'
+                      'w-full flex items-center justify-between px-2.5 py-2 rounded-md text-xs transition-colors',
+                      activeWorkspace.id === ws.id
+                        ? 'bg-[var(--color-primary-muted)] text-[var(--sidebar-active-text)] font-semibold'
+                        : 'text-[var(--sidebar-text)] hover:bg-white/5 hover:text-white'
                     )}
                   >
                     <div className="text-left">
-                      <div className="font-semibold">{ws.name}</div>
-                      <div className="text-[10px] text-slate-400">{ws.plan}</div>
+                      <div className="font-medium">{ws.name}</div>
+                      <div className="text-[10px] opacity-60">{ws.plan}</div>
                     </div>
-                    {activeWorkspace.id === ws.id && <Check className="w-4 h-4 text-indigo-400" />}
+                    {activeWorkspace.id === ws.id && <Check className="w-3.5 h-3.5" />}
                   </button>
                 ))}
               </div>
             )}
           </div>
         ) : (
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white shadow-md ring-1 ring-white/20">
-            <Command className="w-5 h-5" />
-          </div>
-        )}
-
-        {/* Collapse toggle — desktop */}
-        {!isCollapsed && (
-          <button
-            onClick={toggleCollapsed}
-            className="hidden lg:flex w-7 h-7 items-center justify-center rounded-lg text-[var(--sidebar-text)] hover:text-white hover:bg-white/10 transition-colors ml-1"
-            aria-label="Collapse sidebar"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
+          <>
+            <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)] flex items-center justify-center text-white">
+              <Command className="w-4 h-4" />
+            </div>
+          </>
         )}
       </div>
 
+      {/* Expand button when collapsed */}
       {isCollapsed && (
         <button
           onClick={toggleCollapsed}
-          className="hidden lg:flex mx-auto mt-3 w-8 h-8 items-center justify-center rounded-lg text-[var(--sidebar-text)] hover:text-white hover:bg-white/10 transition-colors"
+          className="hidden lg:flex mx-auto mt-2 w-8 h-8 items-center justify-center rounded-md text-[var(--sidebar-text)] hover:text-white hover:bg-white/8 transition-colors"
+          aria-label="Expand sidebar"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
       )}
 
-      {/* Navigation Groups with 32px (space-y-8) Section Spacing */}
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden py-6 px-3 space-y-8">
+      {/* ── Navigation ─────────────────────────────────────── */}
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-2 space-y-6 scrollbar-none" aria-label="Primary">
         {navGroups.map((group) => (
-          <div key={group.label} className="space-y-1">
+          <div key={group.label} className="space-y-0.5">
             {!isCollapsed && (
-              <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-[var(--sidebar-text)] opacity-60">
+              <p className="px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--sidebar-text)] opacity-50">
                 {group.label}
               </p>
             )}
@@ -244,26 +269,28 @@ export const AppLayoutSidebar: FC = () => {
                   onClick={closeMobile}
                   className={({ isActive }) =>
                     clsx(
-                      'flex items-center justify-between px-3 h-[44px] rounded-xl text-btn-std transition-all duration-200 group relative',
+                      'flex items-center gap-2.5 h-[36px] rounded-md text-[13px] font-medium transition-colors relative',
                       isActive
-                        ? 'bg-indigo-500/15 text-indigo-400 font-semibold border-l-2 border-indigo-500'
-                        : 'text-[var(--sidebar-text)] hover:text-white hover:bg-white/5 border-l-2 border-transparent',
-                      isCollapsed && 'justify-center px-0'
+                        ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-active-text)]'
+                        : 'text-[var(--sidebar-text)] hover:text-[var(--sidebar-text-hover)] hover:bg-[var(--sidebar-hover)]',
+                      isCollapsed ? 'justify-center px-0' : 'px-3'
                     )
                   }
                   title={isCollapsed ? item.label : undefined}
                 >
                   {({ isActive }) => (
                     <>
-                      <div className="flex items-center gap-3 min-w-0">
-                        {Icon && (
-                          <Icon className={clsx('w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-105', isActive ? 'text-indigo-400' : 'text-[var(--sidebar-text)]')} />
-                        )}
+                      {/* Active indicator pill */}
+                      {isActive && (
+                        <span className="absolute left-0 top-[8px] bottom-[8px] w-[3px] rounded-r-full bg-[var(--color-primary)]" />
+                      )}
+                      <span className="flex items-center gap-2.5 min-w-0 flex-1">
+                        {Icon && <Icon className={clsx('w-[18px] h-[18px] flex-shrink-0', isActive ? 'text-[var(--sidebar-active-text)]' : '')} />}
                         {!isCollapsed && <span className="truncate">{item.label}</span>}
-                      </div>
+                      </span>
 
                       {!isCollapsed && item.badge && (
-                        <span className="text-badge-std px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[var(--color-primary-muted)] text-[var(--sidebar-active-text)] min-w-[20px] text-center">
                           {item.badge}
                         </span>
                       )}
@@ -276,42 +303,31 @@ export const AppLayoutSidebar: FC = () => {
         ))}
       </nav>
 
-      {/* Bottom Profile Section */}
-      <div className="flex-shrink-0 border-t border-[var(--sidebar-border)] p-3 space-y-1">
-        <NavLink
-          to="/settings/general"
-          className={({ isActive }) =>
-            clsx(
-              'flex items-center gap-3 px-3 h-[44px] rounded-xl text-btn-std transition-colors',
-              isActive ? 'bg-indigo-500/15 text-indigo-400 font-semibold' : 'text-[var(--sidebar-text)] hover:text-white hover:bg-white/5',
-              isCollapsed && 'justify-center px-0'
-            )
-          }
-          title={isCollapsed ? 'Settings' : undefined}
-        >
-          <Settings className="w-5 h-5 flex-shrink-0" />
-          {!isCollapsed && <span>Settings & Billing</span>}
-        </NavLink>
-
+      {/* ── Bottom Section ──────────────────────────────────── */}
+      <div className="flex-shrink-0 border-t border-[var(--sidebar-border)] p-2 space-y-1">
         {user && (
-          <div className={clsx('flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/5 border border-white/5', isCollapsed && 'justify-center px-1')}>
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0 shadow-md">
+          <div className={clsx(
+            'flex items-center gap-2.5 px-2 py-2 rounded-md',
+            isCollapsed && 'justify-center px-0'
+          )}>
+            <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)] flex items-center justify-center text-xs font-semibold text-white flex-shrink-0">
               {formatUtils.initials(user.fullName)}
             </div>
             {!isCollapsed && (
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-bold text-white truncate">{user.fullName}</div>
-                <div className="text-[10px] text-[var(--sidebar-text)] truncate capitalize">{user.role.replace('_', ' ')}</div>
-              </div>
-            )}
-            {!isCollapsed && (
-              <button
-                onClick={handleLogout}
-                className="text-[var(--sidebar-text)] hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-white/10"
-                title="Sign out"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
+              <>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-medium text-white truncate">{user.fullName}</div>
+                  <div className="text-[11px] text-[var(--sidebar-text)] truncate capitalize">{user.role.replace('_', ' ')}</div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="text-[var(--sidebar-text)] hover:text-red-400 transition-colors p-1 rounded-md hover:bg-white/5"
+                  title="Sign out"
+                  aria-label="Sign out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </>
             )}
           </div>
         )}

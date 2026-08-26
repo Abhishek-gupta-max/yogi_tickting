@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { useState } from 'react';
-import { UsersRound, Plus, FolderTree, Shield, Search, CheckCircle2, UserPlus, Mail } from 'lucide-react';
+import { UsersRound, Plus, Search, UserPlus, Users, Ticket, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import toast from 'react-hot-toast';
 
@@ -14,38 +14,10 @@ interface Team {
 }
 
 const MOCK_TEAMS: Team[] = [
-  {
-    id: 'team-sec',
-    name: 'Security & Auth Response Squad',
-    department: 'Software Engineering',
-    lead: 'Sophia Martinez',
-    members: ['Sophia Martinez', 'David Miller', 'Alex Chen', 'Elena Rostova'],
-    activeTickets: 5,
-  },
-  {
-    id: 'team-l1',
-    name: 'Tier-1 Helpdesk Frontline',
-    department: 'IT Helpdesk',
-    lead: 'Marcus Brody',
-    members: ['Marcus Brody', 'Sarah Connor', 'John Doe', 'Emily Watson', 'Tom Hanks'],
-    activeTickets: 12,
-  },
-  {
-    id: 'team-cloud',
-    name: 'Kubernetes & Infrastructure Ops',
-    department: 'DevOps & Cloud Security',
-    lead: 'Alexander Wright',
-    members: ['Alexander Wright', 'Viktor Krum', 'Hermione Granger'],
-    activeTickets: 3,
-  },
-  {
-    id: 'team-billing',
-    name: 'Enterprise Billing & Invoicing',
-    department: 'Billing & Finance',
-    lead: 'Rachel Green',
-    members: ['Rachel Green', 'Monica Geller', 'Chandler Bing'],
-    activeTickets: 2,
-  },
+  { id: 'team-sec',   name: 'Security & Auth Response Squad',  department: 'Software Engineering',   lead: 'Sophia Martinez',  members: ['Sophia Martinez', 'David Miller', 'Alex Chen', 'Elena Rostova'], activeTickets: 5 },
+  { id: 'team-l1',    name: 'Tier-1 Helpdesk Frontline',        department: 'IT Helpdesk',           lead: 'Marcus Brody',     members: ['Marcus Brody', 'Sarah Connor', 'John Doe', 'Emily Watson', 'Tom Hanks'], activeTickets: 12 },
+  { id: 'team-cloud', name: 'Kubernetes & Infrastructure Ops',  department: 'DevOps & Cloud Security',lead: 'Alexander Wright', members: ['Alexander Wright', 'Viktor Krum', 'Hermione Granger'], activeTickets: 3 },
+  { id: 'team-billing',name: 'Enterprise Billing & Invoicing',   department: 'Billing & Finance',     lead: 'Rachel Green',     members: ['Rachel Green', 'Monica Geller', 'Chandler Bing'], activeTickets: 2 },
 ];
 
 export const TeamsPage: FC = () => {
@@ -76,151 +48,162 @@ export const TeamsPage: FC = () => {
     };
 
     setTeams([created, ...teams]);
-    toast.success(`Team "${created.name}" created successfully!`);
+    toast.success(`Team "${created.name}" created!`);
     setShowModal(false);
     setNewTeamName('');
   };
 
   return (
-    <div className="space-y-6 animate-fade-in pb-12">
+    <div className="space-y-6 animate-fade-in pb-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--surface-border)] pb-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <UsersRound className="w-6 h-6 text-indigo-500" />
-            Support Teams & Rosters
-          </h1>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
-            Configure sub-teams, assign agents, and manage ticket distribution pools
-          </p>
+      <div className="page-header-row">
+        <div className="page-header">
+          <h1 className="text-page-title text-[var(--text-primary)]">Teams & Rosters</h1>
+          <p className="text-body-std text-[var(--text-secondary)]">Configure sub-teams, assign agents, and manage ticket distribution pools</p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-500/20 transition-all self-start sm:self-auto"
-        >
+        <button onClick={() => setShowModal(true)} className="btn-enterprise btn-enterprise-primary">
           <Plus className="w-4 h-4" /> Create Team
         </button>
       </div>
 
       {/* Search */}
-      <div className="surface-card p-4 flex items-center justify-between gap-3">
-        <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
+      <div className="surface-card p-4 flex flex-col sm:flex-row items-center gap-3">
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
           <input
             type="text"
-            placeholder="Search teams or departments..."
+            placeholder="Search teams or departments…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-xl text-xs bg-[var(--surface-bg)] text-[var(--text-primary)] border border-[var(--surface-border)] outline-none focus:ring-2 focus:ring-indigo-500/30"
+            className="field-input field-input-sm pl-9"
           />
         </div>
-        <span className="text-xs text-[var(--text-muted)]">{filtered.length} Teams Active</span>
+        <span className="text-caption text-[var(--text-muted)] ml-auto">{filtered.length} Teams Active</span>
       </div>
 
-      {/* Teams Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {filtered.map((team) => (
-          <div key={team.id} className="surface-card p-5 space-y-4 hover:border-indigo-500/40 transition-all">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
-                  {team.department}
-                </span>
-                <h3 className="text-base font-bold text-[var(--text-primary)] mt-1">{team.name}</h3>
-              </div>
-              <span className="text-xs font-semibold text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
-                {team.activeTickets} Active Tickets
-              </span>
-            </div>
-
-            <div className="space-y-2 text-xs">
-              <p className="text-[var(--text-muted)]">Team Lead: <strong className="text-[var(--text-primary)]">{team.lead}</strong></p>
-              <div>
-                <p className="text-[var(--text-muted)] mb-1.5 font-semibold">Assigned Agents ({team.members.length}):</p>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {team.members.map((m, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2.5 py-1 rounded-lg bg-[var(--surface-bg)] text-[var(--text-primary)] border border-[var(--surface-border)] text-[11px] font-medium"
-                    >
-                      {m}
+      {/* Teams Table */}
+      <div className="surface-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="table-enterprise">
+            <thead>
+              <tr>
+                <th>Team Name</th>
+                <th>Department</th>
+                <th>Team Lead</th>
+                <th>Members</th>
+                <th>Active Tickets</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((team) => (
+                <tr key={team.id} className="group">
+                  <td>
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-[var(--color-primary-muted)] flex items-center justify-center flex-shrink-0">
+                        <UsersRound className="w-4 h-4 text-[var(--color-primary)]" />
+                      </div>
+                      <span className="text-[13px] font-medium text-[var(--text-primary)]">{team.name}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="text-[12px] font-semibold text-[var(--color-primary)] bg-[var(--color-primary-muted)] px-2 py-0.5 rounded">
+                      {team.department}
                     </span>
-                  ))}
-                  <button
-                    onClick={() => toast.success(`Add member to ${team.name}`)}
-                    className="p-1 rounded-lg border border-dashed border-indigo-500/40 text-indigo-500 hover:bg-indigo-500/10"
-                    title="Add Team Member"
-                  >
-                    <UserPlus className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
+                  </td>
+                  <td className="text-[13px] font-medium text-[var(--text-primary)]">{team.lead}</td>
+                  <td>
+                    <div className="flex items-center gap-1 flex-wrap">
+                      <span className="text-[13px] text-[var(--text-secondary)] font-medium mr-1">{team.members.length} agents:</span>
+                      {team.members.slice(0, 3).map((m, idx) => (
+                        <span key={idx} className="text-[11px] px-1.5 py-0.5 rounded bg-[var(--surface-bg)] border border-[var(--surface-border)] text-[var(--text-muted)]">
+                          {m.split(' ')[0]}
+                        </span>
+                      ))}
+                      {team.members.length > 3 && (
+                        <span className="text-[11px] text-[var(--text-muted)]">+{team.members.length - 3}</span>
+                      )}
+                    </div>
+                  </td>
+                  <td>
+                    <span className={clsx('text-[13px] font-semibold', team.activeTickets > 0 ? 'text-amber-600' : 'text-[var(--text-muted)]')}>
+                      {team.activeTickets}
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => toast.success(`Manage ${team.name}`)}
+                      className="text-[13px] font-medium text-[var(--color-primary)] hover:underline opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      Manage →
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="surface-card w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
-              <UsersRound className="w-5 h-5 text-indigo-500" /> Create New Support Team
-            </h2>
-            <form onSubmit={handleCreateTeam} className="space-y-3 text-xs">
-              <div>
-                <label className="block text-[var(--text-primary)] font-semibold mb-1">Team Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Mobile iOS Support Squad"
-                  value={newTeamName}
-                  onChange={(e) => setNewTeamName(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[var(--surface-bg)] text-[var(--text-primary)] border border-[var(--surface-border)] outline-none focus:ring-2 focus:ring-indigo-500/40"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-[var(--text-primary)] font-semibold mb-1">Department</label>
-                <select
-                  value={newDept}
-                  onChange={(e) => setNewDept(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[var(--surface-bg)] text-[var(--text-primary)] border border-[var(--surface-border)] outline-none"
-                >
-                  <option value="IT Helpdesk">IT Helpdesk</option>
-                  <option value="Software Engineering">Software Engineering</option>
-                  <option value="DevOps & Cloud Security">DevOps & Cloud Security</option>
-                  <option value="Billing & Finance">Billing & Finance</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[var(--text-primary)] font-semibold mb-1">Team Lead</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Alex Martinez"
-                  value={newLead}
-                  onChange={(e) => setNewLead(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[var(--surface-bg)] text-[var(--text-primary)] border border-[var(--surface-border)] outline-none"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 border-t border-[var(--surface-border)] pt-4 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-xl border border-[var(--surface-border)] text-[var(--text-primary)]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl text-white bg-indigo-600 hover:bg-indigo-500 font-semibold"
-                >
-                  Save Team
+        <div className="drawer-overlay" onClick={() => setShowModal(false)}>
+          <div className="fixed inset-0 flex items-center justify-center p-4 z-50" onClick={(e) => e.stopPropagation()}>
+            <div className="w-full max-w-md bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-xl p-6 space-y-4 shadow-xl animate-scale-in">
+              <div className="flex items-center justify-between">
+                <h2 className="text-section-head text-[var(--text-primary)]">Create Support Team</h2>
+                <button onClick={() => setShowModal(false)} className="p-1 rounded-md text-[var(--text-muted)] hover:bg-[var(--surface-hover)]">
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-            </form>
+              <form onSubmit={handleCreateTeam} className="space-y-4">
+                <div className="form-field">
+                  <label className="form-label">Team Name *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Mobile Support Squad"
+                    value={newTeamName}
+                    onChange={(e) => setNewTeamName(e.target.value)}
+                    className="field-input"
+                    required
+                  />
+                </div>
+
+                <div className="form-field">
+                  <label className="form-label">Department</label>
+                  <select
+                    value={newDept}
+                    onChange={(e) => setNewDept(e.target.value)}
+                    className="field-input"
+                  >
+                    <option value="IT Helpdesk">IT Helpdesk</option>
+                    <option value="Software Engineering">Software Engineering</option>
+                    <option value="DevOps & Cloud Security">DevOps & Cloud Security</option>
+                    <option value="Billing & Finance">Billing & Finance</option>
+                  </select>
+                </div>
+
+                <div className="form-field">
+                  <label className="form-label">Team Lead</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Alex Martinez"
+                    value={newLead}
+                    onChange={(e) => setNewLead(e.target.value)}
+                    className="field-input"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3 pt-3 border-t border-[var(--surface-border)]">
+                  <button type="button" onClick={() => setShowModal(false)} className="flex-1 btn-enterprise btn-enterprise-secondary">
+                    Cancel
+                  </button>
+                  <button type="submit" className="flex-1 btn-enterprise btn-enterprise-primary">
+                    Save Team
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

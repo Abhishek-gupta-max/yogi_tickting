@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { useState } from 'react';
-import { Workflow, Plus, Zap, CheckCircle2, ArrowRight, Shield } from 'lucide-react';
+import { Plus, Zap, CheckCircle } from 'lucide-react';
+import { clsx } from 'clsx';
 import toast from 'react-hot-toast';
 
 interface AutomationRule {
@@ -18,12 +19,12 @@ const MOCK_RULES: AutomationRule[] = [
     name: 'Auto-Assign Critical SSO Issues to Security Squad',
     trigger: 'On Ticket Created',
     condition: 'Category == "Security & Auth" OR Tags contains "sso"',
-    action: 'Assign to Team "Security & Auth Squad" & Set Priority to Critical',
+    action: 'Assign to Team "Security Squad" & Set Priority to Critical',
     status: 'active',
   },
   {
     id: 'rule-2',
-    name: 'Auto-Reply on New Hardware Provisioning Requests',
+    name: 'Auto-Reply on New Hardware Requests',
     trigger: 'On Ticket Created',
     condition: 'Category == "HR & IT Equipment"',
     action: 'Send Email Template "Hardware Request Intake Received"',
@@ -50,63 +51,62 @@ export const WorkflowsPage: FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in pb-12">
+    <div className="space-y-6 animate-fade-in pb-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--surface-border)] pb-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <Workflow className="w-6 h-6 text-indigo-500" />
-            Workflow Automation & Triggers
-          </h1>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
-            Build IF-THIS-THEN-THAT rules for auto-assignment, auto-replies, and SLA escalations
-          </p>
+      <div className="page-header-row">
+        <div className="page-header">
+          <h1 className="text-page-title text-[var(--text-primary)]">Workflow Automation</h1>
+          <p className="text-body-std text-[var(--text-secondary)]">Build automated rules for ticket routing, auto-replies, and SLA escalations</p>
         </div>
-        <button
-          onClick={() => toast.success('Create new Automation Workflow Rule')}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-500/20 transition-all self-start sm:self-auto"
-        >
+        <button onClick={() => toast.success('Create Automation Rule')} className="btn-enterprise btn-enterprise-primary">
           <Plus className="w-4 h-4" /> Create Rule
         </button>
       </div>
 
-      {/* Rules List */}
-      <div className="space-y-4">
-        {rules.map((r) => (
-          <div key={r.id} className="surface-card p-5 space-y-3 hover:border-indigo-500/40 transition-all">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-amber-500" />
-                <h3 className="text-base font-bold text-[var(--text-primary)]">{r.name}</h3>
-              </div>
-              <button
-                onClick={() => toggleRule(r.id)}
-                className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase cursor-pointer ${
-                  r.status === 'active'
-                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                    : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                }`}
-              >
-                {r.status}
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 rounded-xl bg-[var(--surface-bg)] border border-[var(--surface-border)] text-xs">
-              <div>
-                <span className="text-[10px] text-[var(--text-muted)] block font-semibold">WHEN (Trigger)</span>
-                <span className="font-mono text-indigo-400 font-semibold">{r.trigger}</span>
-              </div>
-              <div>
-                <span className="text-[10px] text-[var(--text-muted)] block font-semibold">IF (Condition)</span>
-                <span className="font-mono text-[var(--text-primary)]">{r.condition}</span>
-              </div>
-              <div>
-                <span className="text-[10px] text-[var(--text-muted)] block font-semibold">THEN (Action)</span>
-                <span className="font-mono text-emerald-400 font-semibold">{r.action}</span>
-              </div>
-            </div>
-          </div>
-        ))}
+      {/* Rules Table */}
+      <div className="surface-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="table-enterprise">
+            <thead>
+              <tr>
+                <th>Rule Name</th>
+                <th>Trigger (WHEN)</th>
+                <th>Condition (IF)</th>
+                <th>Action (THEN)</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rules.map((r) => (
+                <tr key={r.id}>
+                  <td>
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+                        <Zap className="w-4 h-4 text-amber-600" />
+                      </div>
+                      <span className="text-[13px] font-medium text-[var(--text-primary)]">{r.name}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="font-mono text-[12px] text-[var(--color-primary)] font-medium bg-[var(--color-primary-muted)] px-2 py-0.5 rounded">
+                      {r.trigger}
+                    </span>
+                  </td>
+                  <td className="text-[13px] text-[var(--text-secondary)] font-mono text-[12px]">{r.condition}</td>
+                  <td className="text-[13px] text-emerald-600 font-mono text-[12px]">{r.action}</td>
+                  <td>
+                    <button
+                      onClick={() => toggleRule(r.id)}
+                      className={clsx('badge cursor-pointer', r.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-slate-500/10 text-slate-500')}
+                    >
+                      <CheckCircle className="w-3 h-3" /> {r.status}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
