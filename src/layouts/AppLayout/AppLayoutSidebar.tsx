@@ -68,6 +68,11 @@ const NAV_CONFIG: Record<UserRole, NavGroup[]> = {
         { id: 'departments', label: 'Departments', href: '/settings/departments', icon: FolderTree },
         { id: 'teams', label: 'Teams', href: '/settings/teams', icon: UsersRound },
         { id: 'branches', label: 'Branches', href: '/settings/branches', icon: GitBranch },
+      ],
+    },
+    {
+      label: 'Configuration',
+      items: [
         { id: 'roles', label: 'Roles', href: '/settings/roles', icon: ShieldCheck },
         { id: 'sla', label: 'SLA Policies', href: '/settings/sla', icon: Timer },
         { id: 'workflows', label: 'Workflows', href: '/settings/workflows', icon: Workflow },

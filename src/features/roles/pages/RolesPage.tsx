@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { useState } from 'react';
-import { ShieldCheck, CheckCircle2, Users, Key } from 'lucide-react';
+import { ShieldCheck, Check, Minus, Users } from 'lucide-react';
 import { clsx } from 'clsx';
 import toast from 'react-hot-toast';
 
@@ -10,70 +10,140 @@ interface RoleConfig {
   badgeColor: string;
   userCount: number;
   description: string;
-  permissions: string[];
 }
 
 const MOCK_ROLES: RoleConfig[] = [
+  { key: 'super_admin',   name: 'Super Admin',         badgeColor: 'bg-purple-500/10 text-purple-600',            userCount: 2,   description: 'Full global platform control, multi-tenant billing, system logs, and org provisioning.' },
+  { key: 'company_admin', name: 'Company Admin',       badgeColor: 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]', userCount: 5,   description: 'Organization administration: user management, departments, SLA policies, and workflows.' },
+  { key: 'manager',       name: 'Department Manager', badgeColor: 'bg-amber-500/10 text-amber-600',             userCount: 14,  description: 'Department oversight: view all department tickets, reassign agents, monitor SLA breaches, and generate reports.' },
+  { key: 'agent',         name: 'Support Agent',       badgeColor: 'bg-emerald-500/10 text-emerald-600',           userCount: 42,  description: 'Frontline ticket handling: reply to customers, post internal notes, update ticket status, and resolve issues.' },
+  { key: 'customer',      name: 'End Customer / Client',badgeColor: 'bg-blue-500/10 text-blue-600',              userCount: 850, description: 'Customer portal access: create support requests, track status timeline, reply, and access Knowledge Base.' },
+];
+
+const MODULE_PERMISSIONS: { module: string; permissions: Record<string, Record<string, boolean>> }[] = [
   {
-    key: 'super_admin',
-    name: 'Super Admin',
-    badgeColor: 'bg-purple-500/10 text-purple-600',
-    userCount: 2,
-    description: 'Full global platform control, multi-tenant billing, system logs, and organization provisioning.',
-    permissions: ['* (Global Full Access)', 'organizations.manage', 'billing.manage', 'system.logs'],
+    module: 'Tickets',
+    permissions: {
+      super_admin:   { view: true,  create: true,  edit: true,  delete: true,  assign: true },
+      company_admin: { view: true,  create: true,  edit: true,  delete: true,  assign: true },
+      manager:       { view: true,  create: true,  edit: true,  delete: false, assign: true },
+      agent:         { view: true,  create: true,  edit: true,  delete: false, assign: true },
+      customer:      { view: true,  create: true,  edit: false, delete: false, assign: false },
+    },
   },
   {
-    key: 'company_admin',
-    name: 'Company Admin',
-    badgeColor: 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]',
-    userCount: 5,
-    description: 'Organization administration: user management, departments, SLA policies, and workflows.',
-    permissions: ['users.manage', 'departments.manage', 'sla.configure', 'workflows.manage', 'tickets.all'],
+    module: 'Users',
+    permissions: {
+      super_admin:   { view: true,  create: true,  edit: true,  delete: true,  assign: false },
+      company_admin: { view: true,  create: true,  edit: true,  delete: true,  assign: false },
+      manager:       { view: true,  create: true,  edit: true,  delete: false, assign: false },
+      agent:         { view: true,  create: false, edit: false, delete: false, assign: false },
+      customer:      { view: false, create: false, edit: false, delete: false, assign: false },
+    },
   },
   {
-    key: 'manager',
-    name: 'Department Manager',
-    badgeColor: 'bg-amber-500/10 text-amber-600',
-    userCount: 14,
-    description: 'Department oversight: view all department tickets, reassign agents, monitor SLA breaches, and generate reports.',
-    permissions: ['tickets.department_view', 'tickets.assign', 'reports.view', 'sla.monitor'],
+    module: 'Departments',
+    permissions: {
+      super_admin:   { view: true,  create: true,  edit: true,  delete: true,  assign: true },
+      company_admin: { view: true,  create: true,  edit: true,  delete: true,  assign: true },
+      manager:       { view: true,  create: false, edit: false, delete: false, assign: false },
+      agent:         { view: true,  create: false, edit: false, delete: false, assign: false },
+      customer:      { view: false, create: false, edit: false, delete: false, assign: false },
+    },
   },
   {
-    key: 'agent',
-    name: 'Support Agent',
-    badgeColor: 'bg-emerald-500/10 text-emerald-600',
-    userCount: 42,
-    description: 'Frontline ticket handling: reply to customers, post internal notes, update ticket status, and resolve issues.',
-    permissions: ['tickets.handle_assigned', 'comments.create_internal', 'tickets.update_status'],
+    module: 'Teams',
+    permissions: {
+      super_admin:   { view: true,  create: true,  edit: true,  delete: true,  assign: true },
+      company_admin: { view: true,  create: true,  edit: true,  delete: true,  assign: true },
+      manager:       { view: true,  create: true,  edit: true,  delete: false, assign: true },
+      agent:         { view: true,  create: false, edit: false, delete: false, assign: false },
+      customer:      { view: false, create: false, edit: false, delete: false, assign: false },
+    },
   },
   {
-    key: 'customer',
-    name: 'End Customer / Client',
-    badgeColor: 'bg-blue-500/10 text-blue-600',
-    userCount: 850,
-    description: 'Customer portal access: create support requests, track status timeline, reply, and access Knowledge Base.',
-    permissions: ['portal.access', 'tickets.create_self', 'tickets.reply_self'],
+    module: 'SLA Policies',
+    permissions: {
+      super_admin:   { view: true,  create: true,  edit: true,  delete: true,  assign: false },
+      company_admin: { view: true,  create: true,  edit: true,  delete: true,  assign: false },
+      manager:       { view: true,  create: false, edit: false, delete: false, assign: false },
+      agent:         { view: true,  create: false, edit: false, delete: false, assign: false },
+      customer:      { view: false, create: false, edit: false, delete: false, assign: false },
+    },
+  },
+  {
+    module: 'Workflows',
+    permissions: {
+      super_admin:   { view: true,  create: true,  edit: true,  delete: true,  assign: false },
+      company_admin: { view: true,  create: true,  edit: true,  delete: true,  assign: false },
+      manager:       { view: true,  create: false, edit: false, delete: false, assign: false },
+      agent:         { view: false, create: false, edit: false, delete: false, assign: false },
+      customer:      { view: false, create: false, edit: false, delete: false, assign: false },
+    },
+  },
+  {
+    module: 'Reports & Analytics',
+    permissions: {
+      super_admin:   { view: true,  create: true,  edit: true,  delete: true,  assign: false },
+      company_admin: { view: true,  create: true,  edit: true,  delete: true,  assign: false },
+      manager:       { view: true,  create: true,  edit: false, delete: false, assign: false },
+      agent:         { view: true,  create: false, edit: false, delete: false, assign: false },
+      customer:      { view: false, create: false, edit: false, delete: false, assign: false },
+    },
+  },
+  {
+    module: 'Settings',
+    permissions: {
+      super_admin:   { view: true,  create: true,  edit: true,  delete: true,  assign: false },
+      company_admin: { view: true,  create: true,  edit: true,  delete: false, assign: false },
+      manager:       { view: false, create: false, edit: false, delete: false, assign: false },
+      agent:         { view: false, create: false, edit: false, delete: false, assign: false },
+      customer:      { view: false, create: false, edit: false, delete: false, assign: false },
+    },
   },
 ];
+
+const PERM_ACTIONS = ['view', 'create', 'edit', 'delete', 'assign'] as const;
 
 export const RolesPage: FC = () => {
   const [roles] = useState<RoleConfig[]>(MOCK_ROLES);
   const [selectedRole, setSelectedRole] = useState<RoleConfig>(MOCK_ROLES[1]);
+  const [matrix, setMatrix] = useState(MODULE_PERMISSIONS);
+
+  const togglePerm = (moduleIndex: number, action: string) => {
+    setMatrix(prev => prev.map((m, idx) => {
+      if (idx !== moduleIndex) return m;
+      const rolePerms = m.permissions[selectedRole.key] || {};
+      return {
+        ...m,
+        permissions: {
+          ...m.permissions,
+          [selectedRole.key]: {
+            ...rolePerms,
+            [action]: !rolePerms[action],
+          },
+        },
+      };
+    }));
+  };
 
   return (
     <div className="space-y-6 animate-fade-in pb-8">
       {/* Header */}
       <div className="page-header-row">
         <div className="page-header">
-          <h1 className="text-page-title text-[var(--text-primary)]">Roles & RBAC Permissions</h1>
-          <p className="text-body-std text-[var(--text-secondary)]">Configure system access control levels, granular permissions, and security policies</p>
+          <h1 className="text-page-title text-[var(--text-primary)]">Roles & Access Control</h1>
+          <p className="text-body-std text-[var(--text-secondary)]">Configure system access levels, granular permission matrix, and security scopes</p>
         </div>
+        <button onClick={() => toast.success(`Saved permission matrix for ${selectedRole.name}`)} className="btn-enterprise btn-enterprise-primary">
+          Save Matrix
+        </button>
       </div>
 
-      {/* Grid: Role List vs Granular Permissions */}
+      {/* Grid: Role Cards vs Matrix */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Role Cards List */}
-        <div className="lg:col-span-5 space-y-3">
+        {/* Role Cards */}
+        <div className="lg:col-span-4 space-y-3">
           {roles.map((role) => {
             const isSelected = selectedRole.key === role.key;
             return (
@@ -82,13 +152,11 @@ export const RolesPage: FC = () => {
                 onClick={() => setSelectedRole(role)}
                 className={clsx(
                   'surface-card p-4 space-y-2 cursor-pointer transition-all',
-                  isSelected ? 'border-[var(--color-primary)] bg-[var(--color-primary-muted)]' : ''
+                  isSelected ? 'border-[var(--color-primary)] bg-[var(--color-primary-muted)]' : 'hover:border-[var(--color-primary)]'
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <span className={clsx('badge', role.badgeColor)}>
-                    {role.name}
-                  </span>
+                  <span className={clsx('badge', role.badgeColor)}>{role.name}</span>
                   <span className="text-caption text-[var(--text-muted)] flex items-center gap-1">
                     <Users className="w-3.5 h-3.5" /> {role.userCount} users
                   </span>
@@ -99,42 +167,58 @@ export const RolesPage: FC = () => {
           })}
         </div>
 
-        {/* Selected Role Permissions Inspector */}
-        <div className="lg:col-span-7">
-          <div className="surface-card p-6 space-y-5">
-            <div className="flex items-center justify-between border-b border-[var(--surface-border)] pb-4">
+        {/* Matrix Inspector */}
+        <div className="lg:col-span-8">
+          <div className="surface-card overflow-hidden">
+            <div className="p-4 border-b border-[var(--surface-border)] flex items-center justify-between">
               <div>
-                <span className={clsx('badge mb-1', selectedRole.badgeColor)}>
-                  {selectedRole.name}
-                </span>
-                <h2 className="text-section-head text-[var(--text-primary)]">Permission Matrix</h2>
+                <span className={clsx('badge mb-1', selectedRole.badgeColor)}>{selectedRole.name}</span>
+                <h2 className="text-section-head text-[var(--text-primary)]">Granular Permission Matrix</h2>
               </div>
-              <button
-                onClick={() => toast.success(`Permissions updated for ${selectedRole.name}`)}
-                className="btn-enterprise btn-enterprise-primary"
-              >
-                Save Matrix
-              </button>
             </div>
 
-            <div className="space-y-3">
-              <p className="text-[13px] font-semibold text-[var(--text-primary)] flex items-center gap-2">
-                <Key className="w-4 h-4 text-[var(--color-primary)]" /> Granted Scopes ({selectedRole.permissions.length})
-              </p>
-
-              <div className="space-y-2">
-                {selectedRole.permissions.map((perm) => (
-                  <div
-                    key={perm}
-                    className="flex items-center justify-between p-3 rounded-lg bg-[var(--surface-bg)] border border-[var(--surface-border)] text-[13px]"
-                  >
-                    <span className="font-mono text-[var(--color-primary)] font-semibold">{perm}</span>
-                    <span className="text-emerald-600 flex items-center gap-1 font-semibold text-[12px]">
-                      <CheckCircle2 className="w-4 h-4" /> Granted
-                    </span>
-                  </div>
-                ))}
-              </div>
+            <div className="overflow-x-auto">
+              <table className="table-enterprise">
+                <thead>
+                  <tr>
+                    <th>Module</th>
+                    <th className="text-center">View</th>
+                    <th className="text-center">Create</th>
+                    <th className="text-center">Edit</th>
+                    <th className="text-center">Delete</th>
+                    <th className="text-center">Assign</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {matrix.map((row, idx) => {
+                    const rolePerms = row.permissions[selectedRole.key] || {};
+                    return (
+                      <tr key={row.module}>
+                        <td className="font-medium text-[var(--text-primary)]">{row.module}</td>
+                        {PERM_ACTIONS.map((action) => {
+                          const isAllowed = !!rolePerms[action];
+                          return (
+                            <td key={action} className="text-center">
+                              <button
+                                onClick={() => togglePerm(idx, action)}
+                                className={clsx(
+                                  'w-7 h-7 rounded-md inline-flex items-center justify-center transition-colors cursor-pointer',
+                                  isAllowed
+                                    ? 'bg-emerald-500/10 text-emerald-600 font-bold border border-emerald-500/20 hover:bg-emerald-500/20'
+                                    : 'bg-[var(--surface-bg)] text-[var(--text-muted)] border border-[var(--surface-border)] hover:bg-[var(--surface-hover)]'
+                                )}
+                                title={`${action.toUpperCase()} ${row.module}`}
+                              >
+                                {isAllowed ? <Check className="w-4 h-4 stroke-[3]" /> : <Minus className="w-3 h-3" />}
+                              </button>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
