@@ -102,18 +102,18 @@ export const KnowledgeBasePage: FC = () => {
   return (
     <div className="space-y-6 animate-fade-in pb-8">
       {/* Search Header */}
-      <div className="surface-card p-8 text-center space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-primary-muted)] text-[var(--color-primary)] text-[11px] font-semibold uppercase tracking-wider">
+      <div className="surface-card p-6 text-center space-y-3">
+        <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[var(--color-primary-muted)] text-[var(--color-primary)] text-[11px] font-semibold uppercase tracking-wider">
           <BookOpen className="w-3.5 h-3.5" /> Help Center & Knowledge Base
         </div>
-        <h1 className="text-page-title text-[var(--text-primary)]">How can we help you?</h1>
+        <h1 className="text-page-title text-[var(--text-primary)]">Knowledge Base & Documentation</h1>
         <div className="relative max-w-lg mx-auto">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search articles, guides, SAML SSO, API docs…"
+            placeholder="Search articles, SAML SSO, API docs, workflows…"
             className="field-input pl-10"
           />
         </div>

@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Bell, CheckCheck, X, AlertTriangle, UserCheck,
-  TicketIcon, Shield, Settings, ToggleLeft, ToggleRight,
-  MessageSquare,
+  Ticket as TicketIcon, Shield, Settings,
+  MessageSquare, Filter,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useNotificationStore } from '@/store/ui.store';
@@ -35,12 +35,12 @@ const TYPE_CONFIG: Record<NotifType, { icon: FC<any>; color: string }> = {
 
 export const NotificationsPage: FC = () => {
   const { markAllAsRead } = useNotificationStore();
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'unread' | 'sla'>('all');
   const [notifs, setNotifs] = useState<Notif[]>(INITIAL_NOTIFS);
-  const [activeSection, setActiveSection] = useState<'feed' | 'settings'>('feed');
 
   const filtered = notifs.filter(n => {
     if (activeTab === 'unread') return !n.read;
+    if (activeTab === 'sla') return n.type === 'sla';
     return true;
   });
 
@@ -72,6 +72,28 @@ export const NotificationsPage: FC = () => {
         </div>
       </div>
 
+      {/* Filter Bar */}
+      <div className="surface-card p-3 flex items-center gap-2">
+        {[
+          { id: 'all',    label: 'All Notifications' },
+          { id: 'unread', label: `Unread (${unreadCount})` },
+          { id: 'sla',    label: 'SLA Alerts' },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={clsx(
+              'px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors',
+              activeTab === tab.id
+                ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)] shadow-xs'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* Notifications List */}
       <div className="surface-card overflow-hidden">
         <div className="divide-y divide-[var(--surface-border)]">
@@ -89,8 +111,8 @@ export const NotificationsPage: FC = () => {
                   key={n.id}
                   onClick={() => markRead(n.id)}
                   className={clsx(
-                    'p-4 flex items-start gap-3 transition-colors cursor-pointer group',
-                    !n.read ? 'bg-[var(--surface-hover)]' : ''
+                    'p-4 flex items-start gap-3 transition-colors cursor-pointer group relative',
+                    !n.read ? 'bg-[var(--surface-hover)] border-l-2 border-l-[var(--color-primary)]' : ''
                   )}
                 >
                   <div className={clsx('w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0', conf.color)}>
@@ -98,7 +120,8 @@ export const NotificationsPage: FC = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between text-xs mb-1">
-                      <span className={clsx('font-semibold', !n.read ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]')}>
+                      <span className={clsx('font-semibold flex items-center gap-1.5', !n.read ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]')}>
+                        {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] flex-shrink-0" />}
                         {n.title}
                       </span>
                       <span className="text-caption text-[var(--text-muted)]">{n.time}</span>

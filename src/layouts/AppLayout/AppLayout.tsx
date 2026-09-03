@@ -38,7 +38,7 @@ export const AppLayout: FC = () => {
           role="main"
           className="flex-1 overflow-y-auto overflow-x-hidden bg-[var(--surface-bg)]"
         >
-          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 space-y-6 min-h-full">
+          <div className="w-full max-w-full px-4 md:px-5 lg:px-6 xl:px-8 py-4 md:py-5 lg:py-6 space-y-6 min-h-full">
             <Outlet />
           </div>
         </main>

@@ -10,7 +10,7 @@
   /* Custom animations */
   --animate-fade-in:        fadeIn 0.15s ease-out;
   --animate-slide-up:       slideUp 0.15s ease-out;
-  --animate-slide-in-right: slideInRight 0.15s ease-out;
+  --animate-slide-in-right: slideInRight 0.2s ease-out;
   --animate-scale-in:       scaleIn 0.12s ease-out;
   --animate-shimmer:        shimmer 1.5s infinite;
   --animate-pulse-soft:     pulseSoft 2s ease-in-out infinite;
@@ -18,8 +18,8 @@
   /* Keyframes */
   @keyframes fadeIn       { from { opacity: 0; } to { opacity: 1; } }
   @keyframes slideUp      { from { transform: translateY(6px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  @keyframes slideInRight { from { transform: translateX(12px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-  @keyframes scaleIn      { from { transform: scale(0.97); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes slideInRight { from { transform: translateX(16px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes scaleIn      { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   @keyframes pulseSoft    { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
   @keyframes shimmer      { from { background-position: -200% 0; } to { background-position: 200% 0; } }
 
@@ -57,19 +57,25 @@
   /* ── Primary Action Color ────────────────────────────── */
   --color-primary:        #635BFF;
   --color-primary-hover:  #5147E8;
-  --color-primary-muted:  rgba(99, 91, 255, 0.12);
+  --color-primary-muted:  rgba(99, 91, 255, 0.10);
   --color-primary-ring:   rgba(99, 91, 255, 0.25);
 
   /* ── Semantic Colors ─────────────────────────────────── */
   --color-success:        #10B981;
+  --color-success-muted:  rgba(16, 185, 129, 0.10);
   --color-warning:        #F59E0B;
+  --color-warning-muted:  rgba(245, 158, 11, 0.10);
   --color-danger:         #EF4444;
+  --color-danger-muted:   rgba(239, 68, 68, 0.10);
   --color-info:           #3B82F6;
+  --color-info-muted:     rgba(59, 130, 246, 0.10);
+  --color-orange:         #F97316;
+  --color-orange-muted:   rgba(249, 115, 22, 0.10);
 
   /* ── Light Theme Surfaces ────────────────────────────── */
   --surface-bg:           #F8FAFC;
   --surface-card:         #FFFFFF;
-  --surface-card-alt:     #F1F5F9;
+  --surface-card-alt:     #F8FAFC;
   --surface-elevated:     #FFFFFF;
   --surface-border:       #E2E8F0;
   --surface-muted:        #F1F5F9;
@@ -85,7 +91,7 @@
   /* ── Sidebar (Always dark) ───────────────────────────── */
   --sidebar-bg:           #070D1F;
   --sidebar-hover:        rgba(255, 255, 255, 0.05);
-  --sidebar-active:       rgba(99, 91, 255, 0.15);
+  --sidebar-active:       rgba(99, 91, 255, 0.14);
   --sidebar-active-text:  #A5B4FC;
   --sidebar-text:         #94A3B8;
   --sidebar-text-hover:   #F8FAFC;
@@ -97,18 +103,18 @@
   --radius-xs:   2px;
   --radius-sm:   4px;
   --radius-md:   6px;
-  --radius-lg:   8px;   /* Buttons, Inputs, Badges */
+  --radius-lg:   8px;   /* Buttons, Inputs */
   --radius-xl:   12px;  /* Cards, Panels */
   --radius-2xl:  16px;
   --radius-full: 9999px;
 
   /* ── Standard Dimensions ─────────────────────────────── */
-  --header-height:  60px;
-  --input-height:   44px;
-  --input-height-sm: 36px;
-  --button-height:  40px;
-  --button-height-sm: 32px;
-  --button-height-lg: 48px;
+  --header-height:      60px;
+  --input-height:       44px;
+  --input-height-sm:    36px;
+  --button-height:      40px;
+  --button-height-sm:   32px;
+  --button-height-lg:   44px;
 
   /* ── Shadows (minimal enterprise) ────────────────────── */
   --shadow-xs:   0 1px 2px 0 rgba(0, 0, 0, 0.03);
@@ -150,6 +156,7 @@
   --shadow-sm:    0 1px 3px rgba(0, 0, 0, 0.25);
   --shadow-md:    0 4px 8px rgba(0, 0, 0, 0.3);
   --shadow-lg:    0 10px 20px rgba(0, 0, 0, 0.35);
+  --shadow-xl:    0 20px 40px rgba(0, 0, 0, 0.45);
 }
 
 /* ============================================================
@@ -180,19 +187,19 @@ body {
 }
 
 /* ── Typography Scale ──────────────────────────────────── */
-.text-page-title     { font-size: 24px;  font-weight: 700; line-height: 1.25; letter-spacing: -0.02em; }
-.text-section-head   { font-size: 18px;  font-weight: 600; line-height: 1.3;  letter-spacing: -0.015em; }
-.text-card-title     { font-size: 14px;  font-weight: 600; line-height: 1.4;  letter-spacing: -0.01em; }
-.text-card-value     { font-size: 28px;  font-weight: 700; line-height: 1.2;  letter-spacing: -0.02em; }
-.text-body-std       { font-size: 14px;  font-weight: 400; line-height: 1.5;  letter-spacing: -0.01em; }
-.text-small-std      { font-size: 13px;  font-weight: 400; line-height: 1.45; letter-spacing: -0.01em; }
-.text-caption        { font-size: 12px;  font-weight: 400; line-height: 1.4;  letter-spacing: 0; }
-.text-table-head     { font-size: 12px;  font-weight: 600; line-height: 1.4;  letter-spacing: 0.04em; text-transform: uppercase; }
-.text-table-body     { font-size: 14px;  font-weight: 400; line-height: 1.5; }
-.text-btn-std        { font-size: 14px;  font-weight: 500; line-height: 1; }
-.text-badge-std      { font-size: 11px;  font-weight: 600; line-height: 1; letter-spacing: 0.02em; }
-.text-label          { font-size: 13px;  font-weight: 500; line-height: 1.4; color: var(--text-primary); }
-.text-helper         { font-size: 12px;  font-weight: 400; line-height: 1.4; color: var(--text-muted); }
+.text-page-title    { font-size: 24px;  font-weight: 700; line-height: 1.25; letter-spacing: -0.02em; }
+.text-section-head  { font-size: 18px;  font-weight: 600; line-height: 1.3;  letter-spacing: -0.015em; }
+.text-card-title    { font-size: 14px;  font-weight: 600; line-height: 1.4;  letter-spacing: -0.01em; }
+.text-card-value    { font-size: 26px;  font-weight: 700; line-height: 1.2;  letter-spacing: -0.02em; }
+.text-body-std      { font-size: 14px;  font-weight: 400; line-height: 1.5;  letter-spacing: -0.01em; }
+.text-small-std     { font-size: 13px;  font-weight: 400; line-height: 1.45; letter-spacing: -0.01em; }
+.text-caption       { font-size: 12px;  font-weight: 400; line-height: 1.4;  letter-spacing: 0; }
+.text-table-head    { font-size: 11px;  font-weight: 600; line-height: 1.4;  letter-spacing: 0.05em; text-transform: uppercase; }
+.text-table-body    { font-size: 14px;  font-weight: 400; line-height: 1.5; }
+.text-btn-std       { font-size: 14px;  font-weight: 500; line-height: 1; }
+.text-badge-std     { font-size: 11px;  font-weight: 600; line-height: 1; letter-spacing: 0.02em; }
+.text-label         { font-size: 13px;  font-weight: 500; line-height: 1.4; color: var(--text-primary); }
+.text-helper        { font-size: 12px;  font-weight: 400; line-height: 1.4; color: var(--text-muted); }
 
 /* ── Scrollbar ─────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -210,13 +217,19 @@ body {
   border-radius: var(--radius-md);
 }
 
+/* ── Link base ─────────────────────────────────────────── */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
 /* ============================================================
    STATUS COLORS
    ============================================================ */
-.status-new               { --status-color: #3B82F6; --status-bg: rgba(59,130,246,0.1);  }
-.status-open              { --status-color: #635BFF; --status-bg: rgba(99,91,255,0.1);   }
-.status-assigned          { --status-color: #635BFF; --status-bg: rgba(99,91,255,0.1);   }
-.status-in-progress       { --status-color: #6366F1; --status-bg: rgba(99,102,241,0.1);  }
+.status-new               { --status-color: #635BFF; --status-bg: rgba(99,91,255,0.1);   }
+.status-open              { --status-color: #3B82F6; --status-bg: rgba(59,130,246,0.1);  }
+.status-assigned          { --status-color: #8B5CF6; --status-bg: rgba(139,92,246,0.1);  }
+.status-in-progress       { --status-color: #06B6D4; --status-bg: rgba(6,182,212,0.1);   }
 .status-pending,
 .status-waiting-for-customer { --status-color: #F59E0B; --status-bg: rgba(245,158,11,0.1); }
 .status-resolved          { --status-color: #10B981; --status-bg: rgba(16,185,129,0.1);  }
@@ -228,11 +241,11 @@ body {
    ============================================================ */
 .priority-critical { --priority-color: #EF4444; --priority-bg: rgba(239,68,68,0.1);   }
 .priority-high     { --priority-color: #F97316; --priority-bg: rgba(249,115,22,0.1);  }
-.priority-medium   { --priority-color: #EAB308; --priority-bg: rgba(234,179,8,0.1);   }
+.priority-medium   { --priority-color: #F59E0B; --priority-bg: rgba(245,158,11,0.1);  }
 .priority-low      { --priority-color: #64748B; --priority-bg: rgba(100,116,139,0.08);}
 
 /* ============================================================
-   SURFACE CARDS — 12px radius, no hover lift
+   SURFACE CARDS — 12px radius, enterprise depth
    ============================================================ */
 .surface-card {
   background-color: var(--surface-card);
@@ -240,10 +253,6 @@ body {
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   transition: border-color var(--transition-fast);
-}
-
-.surface-card:hover {
-  border-color: color-mix(in srgb, var(--color-primary) 20%, var(--surface-border));
 }
 
 .surface-card-flat {
@@ -275,12 +284,13 @@ body {
   box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  transition: border-color var(--transition-fast);
+  gap: 10px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .kpi-card:hover {
   border-color: color-mix(in srgb, var(--color-primary) 25%, var(--surface-border));
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
 /* ============================================================
@@ -298,6 +308,8 @@ body {
   color: var(--text-primary);
   outline: none;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .field-input:hover {
@@ -321,12 +333,31 @@ body {
 }
 
 .field-input-error {
-  border-color: var(--color-danger);
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  border-color: var(--color-danger) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+
+/* Select — custom chevron via background-image */
+select.field-input,
+select.field-input-sm {
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 14px;
+  cursor: pointer;
+}
+
+/* Textarea */
+textarea.field-input {
+  height: auto;
+  padding: 10px 12px;
+  resize: vertical;
+  line-height: 1.5;
 }
 
 /* ============================================================
-   BUTTON SYSTEM — 8px radius
+   BUTTON SYSTEM — 8px radius, consistent heights
    ============================================================ */
 .btn-enterprise {
   height: var(--button-height);
@@ -339,25 +370,38 @@ body {
   justify-content: center;
   gap: 6px;
   cursor: pointer;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast),
+              color var(--transition-fast), box-shadow var(--transition-fast),
+              transform var(--transition-fast);
   border: 1px solid transparent;
   white-space: nowrap;
   flex-shrink: 0;
+  font-family: inherit;
+  text-decoration: none;
+  letter-spacing: -0.01em;
 }
 
 .btn-enterprise:active {
   transform: scale(0.98);
 }
 
+.btn-enterprise:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* Primary — solid purple */
 .btn-enterprise-primary {
   background-color: var(--color-primary);
   color: #FFFFFF;
+  border-color: var(--color-primary);
 }
 
 .btn-enterprise-primary:hover {
   background-color: var(--color-primary-hover);
-  box-shadow: 0 1px 3px rgba(99, 91, 255, 0.3);
+  border-color: var(--color-primary-hover);
+  box-shadow: 0 2px 8px rgba(99, 91, 255, 0.28);
 }
 
 /* Secondary — outline */
@@ -375,6 +419,7 @@ body {
 /* Tertiary — text only */
 .btn-enterprise-tertiary {
   background: transparent;
+  border-color: transparent;
   color: var(--text-secondary);
 }
 
@@ -387,10 +432,12 @@ body {
 .btn-enterprise-danger {
   background-color: var(--color-danger);
   color: #FFFFFF;
+  border-color: var(--color-danger);
 }
 
 .btn-enterprise-danger:hover {
   background-color: #DC2626;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 /* Sizes */
@@ -421,6 +468,30 @@ body {
 }
 
 /* ============================================================
+   BADGE — Status / Priority pill
+   Spec: 999px border-radius, compact
+   ============================================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ============================================================
    SKELETON LOADER
    ============================================================ */
 .skeleton {
@@ -447,8 +518,9 @@ body {
 .drawer-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.55);
   z-index: var(--z-modal-bg);
+  backdrop-filter: blur(2px);
 }
 
 .drawer-panel {
@@ -475,9 +547,9 @@ body {
 .table-enterprise th {
   height: 44px;
   padding: 0 16px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--text-muted);
   border-bottom: 1px solid var(--surface-border);
@@ -486,10 +558,11 @@ body {
   position: sticky;
   top: 0;
   z-index: 1;
+  user-select: none;
 }
 
 .table-enterprise td {
-  height: 52px;
+  height: 56px;
   padding: 0 16px;
   font-size: 14px;
   border-bottom: 1px solid var(--surface-border);
@@ -507,6 +580,15 @@ body {
 
 .table-enterprise tbody tr:last-child td {
   border-bottom: none;
+}
+
+/* Sortable column header */
+.table-enterprise th[data-sortable] {
+  cursor: pointer;
+}
+
+.table-enterprise th[data-sortable]:hover {
+  color: var(--text-secondary);
 }
 
 /* ============================================================
@@ -541,7 +623,7 @@ body {
   content: '';
   position: absolute;
   left: 11px;
-  top: 24px;
+  top: 26px;
   bottom: 0;
   width: 1px;
   background: var(--surface-border);
@@ -552,34 +634,12 @@ body {
 .timeline-dot {
   width: 24px;
   height: 24px;
-  border-radius: 9999px;
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   border: 2px solid var(--surface-bg);
-}
-
-/* ============================================================
-   BADGE — Status / Priority pill
-   ============================================================ */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: var(--radius-md);
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1.4;
-  white-space: nowrap;
-}
-
-.badge-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
 }
 
 /* ============================================================
@@ -598,6 +658,11 @@ body {
   line-height: 1;
 }
 
+.form-label-required::after {
+  content: ' *';
+  color: var(--color-danger);
+}
+
 .form-helper {
   font-size: 12px;
   color: var(--text-muted);
@@ -608,6 +673,9 @@ body {
   font-size: 12px;
   color: var(--color-danger);
   line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* ============================================================
@@ -628,14 +696,31 @@ body {
 }
 
 /* ============================================================
-   RESPONSIVE CARD (Mobile table replacement)
+   MOBILE TICKET CARD (below 768px table replacement)
+   ============================================================ */
+.mobile-ticket-card {
+  padding: 16px;
+  border-radius: var(--radius-xl);
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  transition: border-color var(--transition-fast);
+}
+
+.mobile-ticket-card:hover,
+.mobile-ticket-card:active {
+  border-color: color-mix(in srgb, var(--color-primary) 40%, var(--surface-border));
+}
+
+/* ============================================================
+   MOBILE ENTITY CARD (users, customers, etc.)
    ============================================================ */
 @media (max-width: 767px) {
   .mobile-card {
-    padding: 16px;
+    padding: 14px 16px;
     border-radius: var(--radius-xl);
     background: var(--surface-card);
     border: 1px solid var(--surface-border);
+    transition: border-color var(--transition-fast);
   }
 }
 
@@ -643,9 +728,9 @@ body {
    KANBAN COLUMN
    ============================================================ */
 .kanban-col {
-  min-width: 280px;
-  max-width: 320px;
-  padding: 16px;
+  min-width: 272px;
+  max-width: 300px;
+  padding: 14px;
   border-radius: var(--radius-xl);
   background: var(--surface-card);
   border: 1px solid var(--surface-border);
@@ -656,5 +741,171 @@ body {
    AUTH ILLUSTRATION BACKGROUND
    ============================================================ */
 .auth-illustration-bg {
-  background: linear-gradient(135deg, #070D1F 0%, #0F172A 50%, #111C32 100%);
+  background: linear-gradient(150deg, #050C1E 0%, #0B1528 50%, #0F172A 100%);
+}
+
+/* ============================================================
+   SECTION LABEL — consistent section heading in right panels
+   ============================================================ */
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ============================================================
+   TOOLTIP UTILITY
+   ============================================================ */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #0F172A;
+  color: #F8FAFC;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  z-index: var(--z-tooltip);
+  box-shadow: var(--shadow-md);
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+}
+
+/* ============================================================
+   UNREAD NOTIFICATION DOT
+   ============================================================ */
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   STATUS DOT (live indicator)
+   ============================================================ */
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: var(--color-success);
+  animation: pulseSoft 2s ease-in-out infinite;
+}
+
+/* ============================================================
+   TAB NAVIGATION (underline style)
+   ============================================================ */
+.tab-nav {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--surface-border);
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tab-nav::-webkit-scrollbar { display: none; }
+
+.tab-item {
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: inherit;
+}
+
+.tab-item:hover {
+  color: var(--text-primary);
+}
+
+.tab-item-active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.empty-state-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-xl);
+  background: var(--color-primary-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+/* ============================================================
+   CHIP / TAG PILL
+   ============================================================ */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  border: 1px solid var(--surface-border);
+}
+
+.chip-removable {
+  padding-right: 4px;
+}
+
+/* ============================================================
+   DIVIDER
+   ============================================================ */
+.divider {
+  height: 1px;
+  background: var(--surface-border);
+  width: 100%;
+}
+
+.divider-vertical {
+  width: 1px;
+  background: var(--surface-border);
+  align-self: stretch;
 }

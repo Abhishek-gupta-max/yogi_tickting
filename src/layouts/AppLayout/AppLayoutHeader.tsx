@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Menu, Search, Bell, Sun, Moon, ChevronRight, Globe, LogOut,
-  ChevronDown, Check, User, X, Plus,
+  ChevronDown, Check, User, X, Plus, Ticket,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useSidebarStore, useNotificationStore } from '@/store/ui.store';
@@ -25,10 +25,10 @@ function useBreadcrumbs(): { label: string; href?: string }[] {
 }
 
 const LANGUAGES = [
-  { code: 'en', label: 'English' },
-  { code: 'es', label: 'Español' },
-  { code: 'fr', label: 'Français' },
-  { code: 'de', label: 'Deutsch' },
+  { code: 'en', label: 'English', short: 'EN' },
+  { code: 'es', label: 'Español', short: 'ES' },
+  { code: 'fr', label: 'Français', short: 'FR' },
+  { code: 'de', label: 'Deutsch', short: 'DE' },
 ];
 
 /* ────────────────────────────────────────────────────────────
@@ -47,7 +47,10 @@ export const AppLayoutHeader: FC = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
 
-  const toggleTheme = useCallback(() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark'), [resolvedTheme, setTheme]);
+  const toggleTheme = useCallback(
+    () => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark'),
+    [resolvedTheme, setTheme]
+  );
 
   const handleLogout = useCallback(() => {
     useAuthStore.getState().logout();
@@ -83,8 +86,9 @@ export const AppLayoutHeader: FC = () => {
         'relative z-30'
       )}
     >
-      {/* ── Left: Hamburger + Breadcrumbs ────────────────── */}
-      <div className="flex items-center gap-2 min-w-0">
+      {/* ── Left: Hamburger + Brand (mobile) + Breadcrumbs ── */}
+      <div className="flex items-center gap-2.5 min-w-0">
+        {/* Hamburger (mobile only) */}
         <button
           onClick={toggleMobile}
           className="lg:hidden btn-enterprise btn-enterprise-secondary btn-icon-sm flex-shrink-0"
@@ -93,19 +97,28 @@ export const AppLayoutHeader: FC = () => {
           <Menu className="w-[18px] h-[18px]" />
         </button>
 
-        <nav className="hidden sm:flex items-center gap-1 min-w-0" aria-label="Breadcrumb">
+        {/* Mobile brand mark */}
+        <div className="lg:hidden flex items-center gap-2 flex-shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-[var(--color-primary)] flex items-center justify-center">
+            <Ticket className="w-3.5 h-3.5 text-white" />
+          </div>
+          <span className="text-[14px] font-bold text-[var(--text-primary)] sm:hidden">TicketFlow</span>
+        </div>
+
+        {/* Breadcrumbs (desktop) */}
+        <nav className="hidden lg:flex items-center gap-1 min-w-0" aria-label="Breadcrumb">
           {breadcrumbs.map((crumb, i) => (
             <div key={i} className="flex items-center gap-1">
-              {i > 0 && <ChevronRight className="w-3 h-3 text-[var(--text-muted)] flex-shrink-0" />}
+              {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-[var(--text-muted)] flex-shrink-0" />}
               {crumb.href ? (
                 <button
                   onClick={() => navigate(crumb.href!)}
-                  className="text-[13px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors truncate"
+                  className="text-[13px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors truncate max-w-[120px]"
                 >
                   {crumb.label}
                 </button>
               ) : (
-                <span className="text-[13px] font-semibold text-[var(--text-primary)] truncate">
+                <span className="text-[13px] font-semibold text-[var(--text-primary)] truncate max-w-[200px]">
                   {crumb.label}
                 </span>
               )}
@@ -115,7 +128,7 @@ export const AppLayoutHeader: FC = () => {
       </div>
 
       {/* ── Right: Search, Quick Create, Notifications, Lang, Theme, User ── */}
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="flex items-center gap-1.5">
         {/* Mobile Search Trigger */}
         <button
           onClick={() => setShowMobileSearch(!showMobileSearch)}
@@ -128,12 +141,12 @@ export const AppLayoutHeader: FC = () => {
         {/* Desktop Command Search Bar */}
         <button
           onClick={() => toast.success('Command Palette triggered (⌘K)')}
-          className="hidden md:flex items-center justify-between w-[280px] lg:w-[360px] h-[36px] px-3 text-[13px] text-[var(--text-muted)] bg-[var(--surface-bg)] hover:bg-[var(--surface-hover)] border border-[var(--surface-border)] rounded-lg transition-colors group"
-          aria-label="Open search"
+          className="hidden md:flex items-center justify-between w-[240px] lg:w-[300px] xl:w-[340px] h-9 px-3 text-[13px] text-[var(--text-muted)] bg-[var(--surface-bg)] hover:bg-[var(--surface-hover)] border border-[var(--surface-border)] rounded-lg transition-colors"
+          aria-label="Open search (⌘K)"
         >
           <div className="flex items-center gap-2 min-w-0">
-            <Search className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
-            <span className="truncate">Search tickets, users, articles…</span>
+            <Search className="w-3.5 h-3.5 text-[var(--text-muted)] flex-shrink-0" />
+            <span className="truncate text-[var(--text-muted)]">Search tickets, users…</span>
           </div>
           <kbd className="flex items-center px-1.5 py-0.5 text-[10px] bg-[var(--surface-card)] border border-[var(--surface-border)] rounded text-[var(--text-muted)] font-mono flex-shrink-0">
             ⌘K
@@ -144,8 +157,8 @@ export const AppLayoutHeader: FC = () => {
         <button
           onClick={() => navigate('/tickets/new')}
           className="btn-enterprise btn-enterprise-primary btn-icon-sm hidden sm:flex"
-          aria-label="Quick create"
-          title="Create ticket"
+          aria-label="Create ticket"
+          title="Create new ticket"
         >
           <Plus className="w-[18px] h-[18px]" />
         </button>
@@ -154,11 +167,11 @@ export const AppLayoutHeader: FC = () => {
         <button
           onClick={() => navigate('/notifications')}
           className="relative btn-enterprise btn-enterprise-secondary btn-icon-sm"
-          aria-label="Notifications"
+          aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
         >
           <Bell className="w-[18px] h-[18px]" />
           {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 w-[18px] h-[18px] text-[9px] font-bold flex items-center justify-center bg-[var(--color-danger)] text-white rounded-full ring-2 ring-[var(--surface-card)]">
+            <span className="absolute -top-0.5 -right-0.5 w-[16px] h-[16px] text-[9px] font-bold flex items-center justify-center bg-[var(--color-danger)] text-white rounded-full ring-2 ring-[var(--surface-card)]">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
@@ -176,7 +189,7 @@ export const AppLayoutHeader: FC = () => {
           </button>
 
           {showLangMenu && (
-            <div className="absolute right-0 mt-1 w-36 bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-lg p-1 shadow-lg z-50 animate-scale-in">
+            <div className="absolute right-0 mt-1.5 w-36 bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-lg p-1 shadow-lg z-50 animate-scale-in">
               {LANGUAGES.map((lang) => (
                 <button
                   key={lang.code}
@@ -188,7 +201,7 @@ export const AppLayoutHeader: FC = () => {
                   className={clsx(
                     'w-full text-left px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors flex items-center justify-between',
                     selectedLang.code === lang.code
-                      ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)] font-semibold'
+                      ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
                       : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
                   )}
                 >
@@ -220,32 +233,44 @@ export const AppLayoutHeader: FC = () => {
               onClick={() => { setShowUserMenu(!showUserMenu); setShowLangMenu(false); }}
               className="flex items-center gap-1.5 rounded-lg p-1 hover:bg-[var(--surface-hover)] transition-colors"
               aria-label="User menu"
+              aria-expanded={showUserMenu}
             >
-              <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)] flex items-center justify-center text-xs font-semibold text-white flex-shrink-0">
+              <div className="w-7 h-7 rounded-md bg-[var(--color-primary)] flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0">
                 {formatUtils.initials(user.fullName)}
               </div>
-              <ChevronDown className="w-3 h-3 text-[var(--text-muted)] hidden sm:block" />
+              <ChevronDown className={clsx(
+                'w-3 h-3 text-[var(--text-muted)] hidden sm:block transition-transform duration-150',
+                showUserMenu && 'rotate-180'
+              )} />
             </button>
 
             {showUserMenu && (
-              <div className="absolute right-0 mt-1 w-52 bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-lg p-1 shadow-lg z-50 animate-scale-in">
-                <div className="px-3 py-2 border-b border-[var(--surface-border)] mb-1">
-                  <div className="text-[13px] font-semibold text-[var(--text-primary)] truncate">{user.fullName}</div>
-                  <div className="text-[11px] text-[var(--text-muted)] truncate">{user.email}</div>
+              <div className="absolute right-0 mt-1.5 w-52 bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-lg p-1 shadow-lg z-50 animate-scale-in">
+                {/* User info */}
+                <div className="px-3 py-2.5 border-b border-[var(--surface-border)] mb-1">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-md bg-[var(--color-primary)] flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0">
+                      {formatUtils.initials(user.fullName)}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-[13px] font-semibold text-[var(--text-primary)] truncate">{user.fullName}</div>
+                      <div className="text-[11px] text-[var(--text-muted)] truncate">{user.email}</div>
+                    </div>
+                  </div>
                 </div>
 
                 <button
                   onClick={() => { setShowUserMenu(false); navigate('/settings/general'); }}
                   className="w-full text-left px-3 py-2 rounded-md text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors flex items-center gap-2"
                 >
-                  <User className="w-4 h-4 text-[var(--text-muted)]" /> Profile & Settings
+                  <User className="w-3.5 h-3.5 text-[var(--text-muted)]" /> Profile & Settings
                 </button>
 
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-3 py-2 rounded-md text-[13px] font-medium text-[var(--color-danger)] hover:bg-red-500/10 transition-colors flex items-center gap-2 mt-1 border-t border-[var(--surface-border)] pt-2"
+                  className="w-full text-left px-3 py-2 rounded-md text-[13px] font-medium text-[var(--color-danger)] hover:bg-[var(--color-danger-muted)] transition-colors flex items-center gap-2 mt-1 border-t border-[var(--surface-border)] pt-2"
                 >
-                  <LogOut className="w-4 h-4" /> Sign Out
+                  <LogOut className="w-3.5 h-3.5" /> Sign Out
                 </button>
               </div>
             )}
@@ -256,18 +281,18 @@ export const AppLayoutHeader: FC = () => {
       {/* ── Mobile Search Overlay ───────────────────────── */}
       {showMobileSearch && (
         <div className="absolute inset-x-0 top-0 h-[60px] bg-[var(--surface-card)] border-b border-[var(--surface-border)] px-4 flex items-center gap-2 z-50 md:hidden animate-fade-in">
-          <div className="flex-1 flex items-center gap-2 bg-[var(--surface-bg)] border border-[var(--surface-border)] rounded-lg px-3 h-[36px]">
+          <div className="flex-1 flex items-center gap-2 bg-[var(--surface-bg)] border border-[var(--surface-border)] rounded-lg px-3 h-9 focus-within:border-[var(--color-primary)] transition-colors">
             <Search className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
             <input
               type="text"
               placeholder="Search tickets, articles…"
-              className="w-full text-[13px] bg-transparent text-[var(--text-primary)] outline-none"
+              className="w-full text-[13px] bg-transparent text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
               autoFocus
             />
           </div>
           <button
             onClick={() => setShowMobileSearch(false)}
-            className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors flex-shrink-0"
           >
             <X className="w-[18px] h-[18px]" />
           </button>
